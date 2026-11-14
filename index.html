@@ -567,6 +567,19 @@ body.mp-dock footer { padding-bottom: 90px; }
 .promo-acts .mbtn { text-decoration: none; }
 .promo-x { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; border: 0; background: rgba(255,255,255,.12); color: #fff; display: grid; place-items: center; }
 .promo-x svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* onglet rangé sur le côté : pochette + compte à rebours */
+.promo-tab { position: fixed; z-index: 5; right: max(20px, env(safe-area-inset-right, 0px)); top: calc(232px + env(safe-area-inset-top, 0px)); display: flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: 16px; cursor: pointer;
+  background: linear-gradient(135deg, rgba(52,64,48,.94), rgba(18,24,18,.94)); border: 1px solid rgba(255,255,255,.22); color: #fff; text-align: left; box-shadow: 0 16px 34px -14px rgba(0,0,0,.7); animation: tabIn .6s cubic-bezier(.2,.7,.2,1) both; }
+.promo-tab[hidden] { display: none !important; }
+.promo-tab img { width: 44px; height: 44px; border-radius: 9px; display: block; flex: none; }
+.promo-tab .pt-txt { display: grid; gap: 2px; }
+.promo-tab b { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; font-size: 16px; letter-spacing: .03em; line-height: 1; }
+.promo-tab small { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: #cfe3c2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.promo-tab:hover { transform: translateX(-2px); }
+@keyframes tabIn { from { opacity: 0; transform: translateX(40px); } }
+@media (max-width: 760px) { .promo-tab { right: auto; left: max(12px, env(safe-area-inset-left, 0px)); top: calc(64px + env(safe-area-inset-top, 0px)); padding: 4px 10px 4px 4px; gap: 8px; border-radius: 12px; }
+  .promo-tab img { width: 32px; height: 32px; border-radius: 7px; } .promo-tab b { font-size: 13px; } .promo-tab small { font-size: 10px; } }
 @keyframes promoIn { from { opacity: 0; } }
 @keyframes promoUp { from { opacity: 0; transform: translateY(24px) scale(.97); } }
 @media (max-width: 620px) { .promo-card { grid-template-columns: 1fr; gap: 16px; padding: 18px; text-align: center; } .promo-cover { width: min(56vw, 220px); justify-self: center; } .promo-cd, .promo-acts { justify-content: center; } }
@@ -698,6 +711,7 @@ body.mp-dock footer { padding-bottom: 90px; }
     </div>
   </div>
 </div>
+<button type="button" class="promo-tab" id="promoTab" hidden aria-label="Album Art Is Art : pré-sauvegarde et compte à rebours"><img src="album/cover-s.jpg" alt=""><span class="pt-txt"><b>Art Is Art</b><small id="promoTabCd"></small></span></button>
 <audio id="mAudio" preload="none"></audio>
 <aside class="panel" id="panel" hidden aria-label="Description de l'œuvre">
   <div class="ptop">
@@ -1437,12 +1451,14 @@ const TRACKS = [["Art is art","3:33"],["Fracture","2:26"],["Frame It","3:09"],["
   window.musicOpen = () => !$("music").hidden;
   window.openMusicTab = openMusic;
 })();
-/* ---------- Pop-up de l'album : quelques secondes après l'arrivée, au plus une fois par jour ---------- */
+/* ---------- Pop-up de l'album : grand format à la toute première visite, puis rangé sur le côté
+   en petit onglet avec le compte à rebours (un clic le rouvre en grand) ---------- */
 (() => {
-  const KEY = "aia-promo-seen", DAY = 864e5;
-  let seen = 0; try { seen = +localStorage.getItem(KEY) || 0; } catch (e) {}
-  if (Date.now() - seen < DAY) return;
+  const KEY = "aia-promo-seen";
+  let seen = false; try { seen = !!localStorage.getItem(KEY); } catch (e) {}
   const released = () => Date.now() >= ALBUM_RELEASE;
+  const EN = LANG === "en";
+  function parts() { const ms = Math.max(0, ALBUM_RELEASE - Date.now()); return [Math.floor(ms / 864e5), Math.floor(ms / 36e5) % 24, Math.floor(ms / 6e4) % 60]; }
   function fill() {
     const go = $("promoGo"); go.href = ALBUM_SMARTLINK || "#";
     if (released()) {
@@ -1450,23 +1466,26 @@ const TRACKS = [["Art is art","3:33"],["Fracture","2:26"],["Frame It","3:09"],["
       $("promoP").textContent = "Mon album Art Is Art est sorti ! Écoutez-le en entier sur votre plateforme préférée.";
       go.textContent = "Écouter l'album"; $("promoCd").hidden = true;
     } else {
-      const ms = ALBUM_RELEASE - Date.now(), d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60;
+      const [d, h, m] = parts();
       $("promoCd").innerHTML = `<span><b>${d}</b>jours</span><span><b>${String(h).padStart(2, "0")}</b>heures</span><span><b>${String(m).padStart(2, "0")}</b>min</span>`;
     }
   }
-  const close = () => { $("promo").hidden = true; try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} };
-  function show() {
-    // pas par-dessus une fiche, la liste des œuvres, l'onglet Musique ou un formulaire en cours
-    const busy = !$("panel").hidden || !$("index").hidden || (window.musicOpen && window.musicOpen()) || (document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName));
-    if (busy) { setTimeout(show, 5000); return; }
-    fill(); $("promo").hidden = false; $("promoGo").focus({ preventScroll: true });
+  function tab() {
+    const t = $("promoTabCd");
+    if (released()) t.textContent = EN ? "Out now · listen" : "Disponible · écouter";
+    else { const [d, h, m] = parts(); t.textContent = EN ? `Out in ${d} d ${h} h ${String(m).padStart(2, "0")} min` : `Sortie dans ${d} j ${h} h ${String(m).padStart(2, "0")} min`; }
   }
+  const showTab = () => { tab(); $("promoTab").hidden = false; };
+  const close = () => { $("promo").hidden = true; try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} showTab(); };
+  function open() { fill(); $("promoTab").hidden = true; $("promo").hidden = false; $("promoGo").focus({ preventScroll: true }); }
   $("promoX").addEventListener("click", close);
   $("promoGo").addEventListener("click", () => setTimeout(close, 50));
   $("promoListen").addEventListener("click", () => { close(); if (window.openMusicTab) window.openMusicTab(); });
   $("promo").addEventListener("click", e => { if (e.target === e.currentTarget) close(); });
+  $("promoTab").addEventListener("click", open);
   addEventListener("keydown", e => { if (e.key === "Escape" && !$("promo").hidden) close(); });
-  setTimeout(show, 7000);
+  setInterval(() => { if (!$("promoTab").hidden) tab(); if (!$("promo").hidden && !released()) fill(); }, 30000);
+  if (seen) showTab(); else setTimeout(open, 1200);   // première visite : en grand dès l'arrivée
 })();
 
 
@@ -2179,7 +2198,7 @@ function goToStop(k, instant) {
     "Arrêter la musique": "Stop the music", "Ouvrir l'album Art Is Art": "Open the album Art Is Art", "Position dans l'extrait": "Position in the preview",
     "Mettre le fond animé en pause": "Pause the animated background", "Relancer le fond animé": "Resume the animated background",
     "Mettre le fond en pause": "Pause the background", "Relancer le fond": "Resume the background",
-    "Ouvrir la fiche de l'œuvre": "Open the artwork page", "Pochette de l'album Art Is Art de MTH": "Cover of the album Art Is Art by MTH",
+    "Ouvrir la fiche de l'œuvre": "Open the artwork page", "Pochette de l'album Art Is Art de MTH": "Cover of the album Art Is Art by MTH", "Album Art Is Art : pré-sauvegarde et compte à rebours": "Album Art Is Art: pre-save and countdown",
     "Collaboration, question…": "Collaboration, question…", "pour que je puisse vous répondre": "so I can reply to you"
   };
   const P = [
