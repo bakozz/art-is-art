@@ -192,6 +192,9 @@ dl { border-top-color: rgba(255,255,255,.22); }
 body.no3d #callouts, body.no3d #stage { display: none; }
 .langbtn { position: fixed; z-index: 6; right: max(20px, env(safe-area-inset-right, 0px)); top: calc(132px + env(safe-area-inset-top, 0px)); font-size: 11px; min-width: 46px; }
 @media (max-width: 760px) { .langbtn { top: calc(64px + env(safe-area-inset-top, 0px)); right: calc(max(12px, env(safe-area-inset-right, 0px)) + 44px); width: 36px; min-width: 0; height: 36px; padding: 0; display: grid; place-items: center; } }
+.soundm { display: none; }
+@media (max-width: 760px) { .soundm { position: fixed; z-index: 6; display: grid; place-items: center; top: calc(64px + env(safe-area-inset-top, 0px)); right: calc(max(12px, env(safe-area-inset-right, 0px)) + 88px); width: 36px; height: 36px; padding: 0; }
+  .soundm svg { width: 18px; height: 18px; fill: currentColor; } .soundm[aria-pressed="true"] #soundMx, .soundm[aria-pressed="false"] #soundMw { display: none; } }
 .try3d { position: fixed; z-index: 6; right: max(20px, env(safe-area-inset-right, 0px)); top: calc(178px + env(safe-area-inset-top, 0px)); font-size: 11px; }
 .try3d[hidden] { display: none !important; }
 @media (max-width: 760px) { .try3d { top: calc(108px + env(safe-area-inset-top, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); } }
@@ -670,6 +673,7 @@ body.mp-dock footer { padding-bottom: 90px; }
 <div id="giant" aria-hidden="true"><span id="giantText">Art is Art</span></div>
 <div id="stage"></div>
 <button type="button" class="pill langbtn" id="langBtn">EN</button>
+<button type="button" class="pill soundm" id="soundM" aria-pressed="false" aria-label="Activer le son"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path id="soundMw" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path id="soundMx" d="M16.5 9.5l5 5m0-5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
 <button type="button" class="pill try3d" id="try3d" hidden>Voir en 3D</button>
 <button type="button" id="flatArt" class="flatart" hidden aria-label="Ouvrir la fiche de l'œuvre"><img alt=""></button>
 <div id="callouts" aria-hidden="true"></div>
@@ -2403,6 +2407,16 @@ function goToStop(k, instant) {
     else if (m.type === "attributes") doEl(m.target);
     else m.addedNodes.forEach(walk);
   })).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+})();
+
+/* téléphone : le bouton « Son » du menu n'a pas la place, il est doublé par une icône à côté de EN */
+(() => {
+  const m = $("soundM"), b = $("sound");
+  const sync = () => { const on = b.getAttribute("aria-pressed") === "true" || /: on/.test(b.textContent);
+    m.setAttribute("aria-pressed", on); m.setAttribute("aria-label", LANG === "en" ? (on ? "Turn sound off" : "Turn sound on") : (on ? "Couper le son" : "Activer le son")); };
+  m.addEventListener("click", () => { b.click(); setTimeout(sync, 50); });
+  new MutationObserver(sync).observe(b, { attributes: true, childList: true, characterData: true, subtree: true });
+  sync();
 })();
 </script>
 
