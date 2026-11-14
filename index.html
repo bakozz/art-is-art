@@ -580,6 +580,75 @@ body.mp-dock footer { padding-bottom: 90px; }
 @keyframes tabIn { from { opacity: 0; transform: translateX(40px); } }
 @media (max-width: 760px) { .promo-tab { right: auto; left: max(12px, env(safe-area-inset-left, 0px)); top: calc(64px + env(safe-area-inset-top, 0px)); padding: 4px 10px 4px 4px; gap: 8px; border-radius: 12px; }
   .promo-tab img { width: 32px; height: 32px; border-radius: 7px; } .promo-tab b { font-size: 13px; } .promo-tab small { font-size: 10px; } }
+
+/* ---------- Onglet Remerciements : même disposition que les œuvres (tableau en 3D posé sur la pierre,
+   grand nom en fond, carte en bas, fiche avec le texte) ---------- */
+.thanks { position: fixed; inset: 0; z-index: 13; overflow-y: auto; overscroll-behavior: contain; color: #fff; background: #120d0a; }
+.thanks[hidden] { display: none !important; }
+.th-bg { position: fixed; inset: 0; pointer-events: none; display: grid; grid-template-columns: 1fr 1fr; }
+.th-bg i { display: block; background-size: cover; background-position: center 40%; position: relative; transition: opacity .6s ease, filter .6s ease; }
+.th-bg .bl { background-image: linear-gradient(rgba(70,34,14,.55), rgba(26,14,8,.82)), url("trees-2.jpg"); }
+.th-bg .br { background-image: linear-gradient(rgba(70,36,64,.5), rgba(22,14,26,.82)), url("trees-5.jpg"); }
+.thanks.on-l .th-bg .br, .thanks.on-r .th-bg .bl { filter: brightness(.45) saturate(.6); }
+@media (max-width: 760px) { .th-bg { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } }
+.th-wrap { position: relative; max-width: 1240px; margin: 0 auto; padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(110px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.th-head { text-align: center; margin: 0 0 10px; display: grid; gap: 6px; }
+.th-head h2 { margin: 0; font-family: var(--f-display); font-weight: 400; text-transform: uppercase; font-size: clamp(44px, 6vw, 84px); line-height: .9; letter-spacing: .01em; }
+.th-head p { margin: 0; font-size: 15px; color: rgba(255,255,255,.75); }
+.th-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(16px, 3vw, 40px); align-items: start; }
+.th-card { --glow: 255,150,70; min-width: 0; width: 100%; position: relative; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 0; padding-top: 30px; transition: opacity .45s ease, filter .45s ease, transform .5s cubic-bezier(.2,.7,.2,1); }
+.th-r { --glow: 240,150,210; }
+/* grand nom en fond, comme le mot géant derrière chaque œuvre */
+.th-word { position: absolute; top: 18%; left: 50%; transform: translateX(-50%); z-index: 0; pointer-events: none; white-space: nowrap; font-family: var(--f-display); text-transform: uppercase;
+  font-size: clamp(64px, 8.6vw, 150px); line-height: .8; color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,.22); transition: -webkit-text-stroke-color .5s ease; }
+.th-card.on .th-word { -webkit-text-stroke-color: rgba(var(--glow), .55); }
+.th-stage { position: relative; z-index: 1; width: 100%; max-width: 520px; display: grid; justify-items: center; }
+.th-art { position: relative; width: 82%; perspective: 1100px; perspective-origin: 50% 40%; z-index: 2; margin-bottom: -18px; }
+.th-scene { position: relative; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.7,.2,1); will-change: transform; }
+.th-l .th-scene { transform: rotateY(14deg) rotateX(3deg); animation: thSwayL 7s ease-in-out infinite; }
+.th-r .th-scene { transform: rotateY(-14deg) rotateX(3deg); animation: thSwayR 7s ease-in-out infinite; }
+@keyframes thSwayL { 0%, 100% { transform: rotateY(14deg) rotateX(3deg) translateY(0); } 50% { transform: rotateY(7deg) rotateX(1deg) translateY(-8px); } }
+@keyframes thSwayR { 0%, 100% { transform: rotateY(-14deg) rotateX(3deg) translateY(0); } 50% { transform: rotateY(-7deg) rotateX(1deg) translateY(-8px); } }
+.f3 { --d: 24px; position: relative; transform-style: preserve-3d; }
+.f3 img { display: block; width: 100%; height: auto; border: 9px solid #f4ece0; outline: 1px solid rgba(0,0,0,.25); transform: translateZ(calc(var(--d) / 2)); backface-visibility: hidden; transition: filter .5s ease, box-shadow .5s ease; }
+.f3 .e { position: absolute; display: block; background: linear-gradient(90deg, #6e5038, #a8835f 45%, #7a5a40); }
+.f3 .e-l { left: 0; top: 0; width: var(--d); height: 100%; transform-origin: left center; transform: translateZ(calc(var(--d) / 2)) rotateY(90deg); filter: brightness(.8); }
+.f3 .e-r { right: 0; top: 0; width: var(--d); height: 100%; transform-origin: right center; transform: translateZ(calc(var(--d) / 2)) rotateY(-90deg); filter: brightness(.65); }
+.f3 .e-t { left: 0; top: 0; height: var(--d); width: 100%; transform-origin: center top; transform: translateZ(calc(var(--d) / 2)) rotateX(-90deg); background: linear-gradient(#c7a37c, #8c6a4b); }
+.f3 .e-b { left: 0; bottom: 0; height: var(--d); width: 100%; transform-origin: center bottom; transform: translateZ(calc(var(--d) / 2)) rotateX(90deg); background: linear-gradient(#6a4c35, #3e2c1f); }
+.f3 .e-back { inset: 0; transform: translateZ(calc(var(--d) / -2)) rotateY(180deg); background: #3a2a1e; box-shadow: 0 40px 70px -20px rgba(0,0,0,.85); }
+.th-duo .th-scene { padding-bottom: 22%; }
+.th-duo .a1 { width: 84%; }
+.th-duo .a2 { position: absolute; width: 46%; right: 0; bottom: 0; transform: translateZ(60px) rotateZ(3deg); transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+/* la pierre : texture de la pierre du site, découpée et éclairée par le haut, avec sa brume */
+.th-rock { position: relative; width: 92%; aspect-ratio: 5 / 1.25; z-index: 1; }
+.th-rock::before { content: ""; position: absolute; left: -18%; right: -18%; top: 10%; bottom: -60%; background: radial-gradient(50% 45% at 50% 50%, rgba(235,232,224,.45), rgba(235,232,224,.12) 55%, transparent 72%); }
+.th-rock .rk { position: absolute; inset: 0; background: linear-gradient(rgba(255,238,214,.38), rgba(255,238,214,.06) 26%, rgba(0,0,0,.18) 48%, rgba(0,0,0,.66)), url("rock.jpg") center / 140% auto;
+  clip-path: polygon(2% 34%, 9% 16%, 24% 7%, 46% 3%, 68% 5%, 86% 12%, 97% 27%, 99% 50%, 93% 76%, 76% 93%, 52% 100%, 27% 96%, 9% 84%, 1% 60%); filter: drop-shadow(0 18px 18px rgba(0,0,0,.55)); }
+.th-rock .pb { position: absolute; left: 3%; bottom: -8%; width: 16%; aspect-ratio: 1.4; background: linear-gradient(rgba(255,238,214,.3), rgba(0,0,0,.6)), url("rock.jpg") 30% 60% / 400% auto;
+  clip-path: polygon(10% 40%, 35% 8%, 70% 4%, 95% 30%, 92% 75%, 60% 98%, 22% 92%, 2% 70%); }
+/* carte en bas, comme sous chaque œuvre */
+.th-info { position: relative; z-index: 3; width: 100%; max-width: 540px; box-sizing: border-box; margin-top: 22px; display: grid; gap: 8px; padding: 22px 24px; border-radius: 22px;
+  background: linear-gradient(135deg, rgba(60,68,58,.62), rgba(22,27,21,.74) 55%, rgba(18,22,16,.8)); border: 1px solid rgba(255,255,255,.2); box-shadow: 0 20px 50px -24px rgba(0,0,0,.8); transition: border-color .4s ease, box-shadow .5s ease; }
+.th-k { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: rgb(var(--glow)); }
+.th-info h3 { margin: 0; font-family: var(--f-display); font-weight: 400; text-transform: uppercase; font-size: clamp(34px, 3.6vw, 52px); line-height: .92; letter-spacing: .01em; }
+.th-info h3 small { font-family: var(--f-body, inherit); font-size: 13px; letter-spacing: .1em; color: rgba(255,255,255,.6); margin-left: 10px; vertical-align: middle; }
+.th-ded { margin: 0; font-size: 15px; font-style: italic; color: rgba(255,255,255,.88); }
+.th-ex { margin: 0; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,.7); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.th-more { justify-self: start; margin-top: 6px; }
+/* surbrillance au survol */
+.th-card.on .th-scene { animation: none; }
+.th-card.on .f3 img { box-shadow: 0 0 0 2px rgba(var(--glow), .95), 0 0 60px rgba(var(--glow), .6); filter: brightness(1.08) saturate(1.12); }
+.th-card.on .th-duo .a2 { transform: translateZ(110px) rotateZ(4deg); }
+.th-card.on .th-info { border-color: rgba(var(--glow), .75); box-shadow: 0 0 0 1px rgba(var(--glow), .3), 0 24px 60px -24px rgba(var(--glow), .55); }
+.th-grid.has-on .th-card:not(.on) { opacity: .45; filter: saturate(.55) brightness(.75); transform: scale(.97); }
+@media (max-width: 760px) { .th-grid { grid-template-columns: minmax(0, 1fr); gap: 50px; } .th-grid.has-on .th-card:not(.on) { opacity: .6; } .th-word { top: 8%; font-size: 22vw; } }
+@media (prefers-reduced-motion: reduce) { .th-card, .th-scene, .f3 img { transition: none; animation: none !important; } }
+/* fiche du message (même style que la fiche d'une œuvre) */
+.th-panel { z-index: 17; }
+.th-pded { margin: -8px 0 18px; font-style: italic; font-size: 17px; color: rgba(255,255,255,.88); }
+@media (max-width: 420px) { .hright { gap: 6px; } .hright .pill.keep, .hright .pill.solid { padding: 8px 10px; font-size: 10px; letter-spacing: .06em; } }
 @keyframes promoIn { from { opacity: 0; } }
 @keyframes promoUp { from { opacity: 0; transform: translateY(24px) scale(.97); } }
 @media (max-width: 620px) { .promo-card { grid-template-columns: 1fr; gap: 16px; padding: 18px; text-align: center; } .promo-cover { width: min(56vw, 220px); justify-self: center; } .promo-cd, .promo-acts { justify-content: center; } }
@@ -612,6 +681,7 @@ body.mp-dock footer { padding-bottom: 90px; }
       <button type="button" class="pill" id="sound" aria-pressed="false">Son : off</button>
       <button type="button" class="pill" id="goCollection">Collection</button>
       <button type="button" class="pill keep" id="openIndex" aria-haspopup="dialog"><span class="lg">Toutes les œuvres</span><span class="sm">Œuvres</span></button>
+      <button type="button" class="pill keep" id="openThanks" aria-haspopup="dialog">Merci</button>
       <button type="button" class="pill keep" id="openMusic" aria-haspopup="dialog"><span class="lg">Musique</span><span class="sm">Musique</span></button>
       <button type="button" class="pill solid" id="goContact">Contact</button>
     </div>
@@ -712,6 +782,44 @@ body.mp-dock footer { padding-bottom: 90px; }
   </div>
 </div>
 <button type="button" class="promo-tab" id="promoTab" hidden aria-label="Album Art Is Art : pré-sauvegarde et compte à rebours"><img src="album/cover-s.jpg" alt=""><span class="pt-txt"><b>Art Is Art</b><small id="promoTabCd"></small></span></button>
+<div class="thanks" id="thanks" hidden role="dialog" aria-modal="true" aria-labelledby="thT">
+  <div class="th-bg" aria-hidden="true"><i class="bl"></i><i class="br"></i></div>
+  <div class="th-wrap">
+    <div class="mtop"><span class="tag" id="thTag"></span><button type="button" class="pill" id="closeThanks">Fermer</button></div>
+    <div class="th-head"><h2 id="thT"></h2><p id="thLead"></p></div>
+    <div class="th-grid" id="thGrid">
+      <article class="th-card th-l" data-side="l">
+        <span class="th-word" aria-hidden="true"></span>
+        <div class="th-stage">
+          <div class="th-art th-duo"><div class="th-scene"><div class="f3 a1"><img src="merci/jesse-1.jpg" alt=""><i class="e e-l"></i><i class="e e-r"></i><i class="e e-t"></i><i class="e e-b"></i><i class="e e-back"></i></div><div class="f3 a2"><img src="merci/jesse-2.jpg" alt=""><i class="e e-l"></i><i class="e e-r"></i><i class="e e-t"></i><i class="e e-b"></i><i class="e e-back"></i></div></div></div>
+          <div class="th-rock" aria-hidden="true"><i class="rk"></i><i class="pb"></i></div>
+        </div>
+        <div class="th-info">
+          <span class="th-k"></span><h3></h3><p class="th-ded"></p><p class="th-ex"></p>
+          <button type="button" class="btn th-more"></button>
+        </div>
+      </article>
+      <article class="th-card th-r" data-side="r">
+        <span class="th-word" aria-hidden="true"></span>
+        <div class="th-stage">
+          <div class="th-art th-solo"><div class="th-scene"><div class="f3 a1"><img src="merci/meline.jpg" alt=""><i class="e e-l"></i><i class="e e-r"></i><i class="e e-t"></i><i class="e e-b"></i><i class="e e-back"></i></div></div></div>
+          <div class="th-rock" aria-hidden="true"><i class="rk"></i><i class="pb"></i></div>
+        </div>
+        <div class="th-info">
+          <span class="th-k"></span><h3></h3><p class="th-ded"></p><p class="th-ex"></p>
+          <button type="button" class="btn th-more"></button>
+        </div>
+      </article>
+    </div>
+  </div>
+</div>
+<aside class="panel th-panel" id="thPanel" hidden aria-label="Message">
+  <div class="ptop"><button type="button" class="close" id="thPanelX">Fermer</button></div>
+  <div class="kicker" id="thPK"></div>
+  <h2 id="thPT"></h2>
+  <p class="th-pded" id="thPD"></p>
+  <div class="wdesc" id="thPText"></div>
+</aside>
 <audio id="mAudio" preload="none"></audio>
 <aside class="panel" id="panel" hidden aria-label="Description de l'œuvre">
   <div class="ptop">
@@ -1451,6 +1559,65 @@ const TRACKS = [["Art is art","3:33"],["Fracture","2:26"],["Frame It","3:09"],["
   window.musicOpen = () => !$("music").hidden;
   window.openMusicTab = openMusic;
 })();
+
+/* ---------- Onglet Remerciements : deux œuvres sur la pierre, qui s'illuminent au survol ---------- */
+(() => {
+  const T = {"fr": {"tag": "Remerciements", "title": "Merci", "lead": "À mon meilleur pote et à ma meilleure amie.", "l": {"k": "Mon meilleur pote", "name": "Jessé", "ded": "À mon frère d’armes, à mon pilier, à mon meilleur pote", "text": ["Dans l'ensemble de mon parcours artistique, ces deux œuvres occupent une place à part, presque sacrée. Elles ne sont pas de simples études de lumière, de composition ou de couleur ; elles sont le journal intime de notre amitié, des fragments de vie capturés à l'encre numérique pour sceller ce qui ne s'effacera jamais. À travers ces toiles, j'ai voulu fixer dans le temps ce sentiment rare et précieux d'avancer dans l'existence sans jamais être réellement seul.", "Il y a d'abord cette première scène : l'habitacle de la voiture qui devient une bulle hors du temps. La route défile vers un couchant incandescent, le tableau de bord diffuse « Clutch » de Col3trane, et nous regardons vers la même direction. Ce sont ces virées sans destination précise où l'on refait le monde, où la musique comble les silences sans qu'aucune parole ne soit nécessaire. Et puis il y a cette seconde toile, posés au bord de la Seine face à la tour Eiffel qui s'illumine sous un ciel flamboyant d'or et d'ocre. Deux silhouettes de dos, témoins d'une ville immense qui continue de tourner pendant que nous prenons le temps d'exister, d'observer et de rêver à ce qui vient.", "Si j'ai peint ces moments, c'est avant tout pour te rendre hommage et te dire ce que la pudeur du quotidien empêche parfois d'exprimer. Merci d'être ce repère inébranlable dans ma vie. Merci d'avoir cru en moi, en mes ambitions et en mon art à des moments où moi-même je pouvais douter du chemin à prendre. Ton soutien n'a jamais eu besoin d'être bruyant pour être puissant : il est dans ta présence, dans ton écoute, dans ta loyauté sans faille et dans cette certitude rassurante de savoir que, peu importe les tempêtes ou les épreuves, tu seras toujours dans mon angle mort pour assurer mes arrières.", "Grandir, construire sa vie et chercher sa voie est un voyage complexe, parfois solitaire. Mais avoir un frère d'armes à ses côtés change absolument tout. Avec toi, les victoires ont une vraie saveur et les défaites ne sont que des étapes qu'on surmonte ensemble d'un éclat de rire.", "Ces deux œuvres sont désormais gravées sur cette toile et sur ce site comme un serment visuel. Peu importe où l'avenir nous mènera, quelles que soient les routes que nous emprunterons et les horizons que nous atteindrons, sache que notre lien reste indestructible. Merci d'être la personne que tu es, merci pour chaque kilomètre partagé et pour tous ceux qu'il nous reste à conquérir. Merci pour tout, mon frère."], "alt1": "La voiture au coucher du soleil, « Clutch » de Col3trane sur l'écran", "alt2": "Deux silhouettes au bord de la Seine face à la tour Eiffel"}, "r": {"k": "Ma meilleure amie", "name": "Doudoune", "real": "Méline", "ded": "À ma meilleure amie, à ma Doudoune", "text": ["Dans mon univers créatif, cette illustration est un havre de douceur, un cocon de lumière et de tendresse. Loin des tensions et des paysages sombres, elle capture l'essence même de ce que nous partageons : un lien pur, complice et évident, à l'image du duo inséparable incarné par Lilo & Stitch.", "Sous un ciel crépusculaire vibrant de teintes roses, dorées et lavande, deux silhouettes dansent sous les palmiers, bordées par l'océan. Stitch, entouré de son aura bleue lumineuse, et Lilo, enveloppée d'une lueur chaude et ambrée, se font face dans un instant de joie simple et suspendue. Ce contraste d'énergies qui s'accordent parfaitement, c'est exactement nous deux : une complémentarité spontanée où chacun éclaire l'autre sans jamais avoir besoin de jouer un rôle.", "Ce texte est pour toi, ma Doudoune. Pour te remercier d'être cette présence bienveillante et sincère dans mon quotidien. Merci pour les fous rires partagés, pour ton écoute sans jugement et pour cette douceur constante qui apaise le tumulte de la vie. Quand le monde extérieur devient trop lourd ou trop complexe, savoir que l'on a une amie comme toi permet de toujours garder son ancrage et sa joie.", "Ohana signifie que la famille ne laisse personne de côté ni n'oublie jamais qui compte vraiment. Tu fais partie de cette famille de cœur que l'on choisit et que l'on chérit. Cette toile est scellée ici pour te rappeler que, peu importe où le temps nous mène et les chemins que nous emprunterons, nous continuerons de danser sous les mêmes lueurs, fidèles à ce surnom et à ce lien unique. Merci pour tout ce que tu apportes à ma vie, Doudoune."], "alt1": "Deux silhouettes qui dansent sous les palmiers au coucher du soleil"}}, "en": {"tag": "Thanks", "title": "Thank you", "lead": "To my two best friends.", "l": {"k": "My best friend", "name": "Jessé", "ded": "To my brother in arms, my rock, my best friend", "text": ["Across my whole artistic journey, these two works hold a special, almost sacred place. They are not mere studies of light, composition or color; they are the diary of our friendship, fragments of life captured in digital ink to seal what will never fade. Through these canvases, I wanted to fix in time that rare and precious feeling of moving through life without ever really being alone.", "First there is this scene: the inside of the car becoming a bubble outside of time. The road rolls toward a blazing sunset, the dashboard plays “Clutch” by Col3trane, and we are looking in the same direction. Those are the drives with no particular destination where we remake the world, where music fills the silences without a single word being needed. And then there is this second canvas, sitting on the banks of the Seine facing the Eiffel Tower as it lights up under a sky ablaze with gold and ochre. Two silhouettes seen from behind, witnesses to an immense city that keeps turning while we take the time to exist, to observe and to dream about what's next.", "If I painted these moments, it is above all to pay tribute to you and tell you what everyday reserve sometimes keeps us from saying. Thank you for being this unshakable landmark in my life. Thank you for believing in me, in my ambitions and in my art at times when I myself could doubt which way to go. Your support never needed to be loud to be powerful: it is in your presence, in the way you listen, in your unfailing loyalty, and in the reassuring certainty that, whatever the storms or trials, you will always be in my blind spot, watching my back.", "Growing up, building a life and finding your way is a complex, sometimes lonely journey. But having a brother in arms by your side changes absolutely everything. With you, victories have a real taste, and defeats are only steps we get past together with a burst of laughter.", "These two works are now engraved on this canvas and on this site like a visual oath. Wherever the future takes us, whatever roads we take and whatever horizons we reach, know that our bond remains indestructible. Thank you for being the person you are, thank you for every mile shared and for all the ones we still have to conquer. Thank you for everything, my brother."], "alt1": "The car at sunset, “Clutch” by Col3trane on the screen", "alt2": "Two silhouettes on the banks of the Seine facing the Eiffel Tower"}, "r": {"k": "My best friend", "name": "Doudoune", "real": "Méline", "ded": "To my best friend, to my Doudoune", "text": ["In my creative universe, this illustration is a haven of gentleness, a cocoon of light and tenderness. Far from tension and dark landscapes, it captures the very essence of what we share: a pure, close and natural bond, like the inseparable duo of Lilo & Stitch.", "Under a twilight sky vibrant with pink, gold and lavender, two silhouettes dance beneath the palm trees, along the ocean. Stitch, surrounded by his glowing blue aura, and Lilo, wrapped in a warm amber glow, face each other in a moment of simple, suspended joy. This contrast of energies that fit together perfectly is exactly the two of us: a spontaneous harmony where each lights up the other without ever needing to play a role.", "This text is for you, my Doudoune. To thank you for being this kind and sincere presence in my everyday life. Thank you for the shared fits of laughter, for listening without judgment and for that constant gentleness that soothes the turmoil of life. When the outside world becomes too heavy or too complicated, knowing you have a friend like you keeps you grounded and keeps your joy alive.", "Ohana means family never leaves anyone behind and never forgets who truly matters. You are part of that family of the heart that we choose and cherish. This canvas is sealed here to remind you that, wherever time takes us and whatever paths we take, we will keep dancing under the same light, true to this nickname and to this unique bond. Thank you for everything you bring to my life, Doudoune."], "alt1": "Two silhouettes dancing under palm trees at sunset"}}}[LANG === "en" ? "en" : "fr"];
+  const MORE = LANG === "en" ? "Read the message" : "Lire le message";
+  $("thTag").textContent = T.tag; $("thT").textContent = T.title; $("thLead").textContent = T.lead;
+  [["l", ".th-l"], ["r", ".th-r"]].forEach(([k, sel]) => {
+    const c = document.querySelector(sel), d = T[k];
+    c.querySelector(".th-word").textContent = d.name;
+    c.querySelector(".th-k").textContent = d.k;
+    const h = c.querySelector("h3"); h.textContent = d.name;
+    if (d.real) { const sm = document.createElement("small"); sm.textContent = d.real; h.append(sm); }
+    c.querySelector(".th-ded").textContent = d.ded;
+    c.querySelector(".th-ex").textContent = d.text[0];
+    const imgs = c.querySelectorAll("img"); imgs[0].alt = d.alt1; if (imgs[1]) imgs[1].alt = d.alt2;
+    const m = c.querySelector(".th-more"); m.textContent = MORE;
+    const open = () => openPanel(k);
+    m.addEventListener("click", open);
+    c.querySelector(".th-art").addEventListener("click", open);
+  });
+  function openPanel(k) {
+    const d = T[k];
+    $("thPK").textContent = d.k; $("thPT").textContent = d.name + (d.real ? " · " + d.real : ""); $("thPD").textContent = d.ded;
+    const box = $("thPText"); box.replaceChildren(); d.text.forEach(t => { const p = document.createElement("p"); p.textContent = t; box.append(p); });
+    $("thPanel").hidden = false; $("thPanel").scrollTop = 0; $("thPanelX").focus({ preventScroll: true });
+  }
+  const closePanel = () => { $("thPanel").hidden = true; };
+  $("thPanelX").addEventListener("click", closePanel);
+  const grid = $("thGrid"), cards = [...grid.querySelectorAll(".th-card")];
+  const setOn = c => {
+    cards.forEach(x => { x.classList.toggle("on", x === c); if (x !== c) x.querySelector(".th-scene").style.transform = ""; });
+    grid.classList.toggle("has-on", !!c);
+    $("thanks").classList.toggle("on-l", !!c && c.dataset.side === "l"); $("thanks").classList.toggle("on-r", !!c && c.dataset.side === "r");
+    if (c && !c.querySelector(".th-scene").style.transform) c.querySelector(".th-scene").style.transform = "translateZ(40px) rotateY(0deg) rotateX(2deg)";
+  };
+  const hoverable = matchMedia("(hover: hover)").matches;
+  cards.forEach(c => {
+    const sc = c.querySelector(".th-scene");
+    c.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") setOn(c); });
+    c.addEventListener("focusin", () => setOn(c));
+    c.addEventListener("pointermove", e => {
+      if (e.pointerType !== "mouse") return;
+      const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+      sc.style.transform = `translateZ(40px) rotateY(${(x * 22).toFixed(2)}deg) rotateX(${(-y * 12).toFixed(2)}deg)`;
+    });
+  });
+  grid.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") setOn(null); });
+  let io = null;
+  if (!hoverable && "IntersectionObserver" in window) io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) setOn(e.target); }), { root: $("thanks"), rootMargin: "-40% 0px -40% 0px" });
+  function openThanks() { $("thanks").hidden = false; lockScroll(true); $("thanks").scrollTop = 0; $("closeThanks").focus({ preventScroll: true }); if (io) cards.forEach(c => io.observe(c)); if (location.hash !== "#merci") history.replaceState(null, "", "#merci"); }
+  function closeThanks() { closePanel(); $("thanks").hidden = true; lockScroll(false); setOn(null); if (io) io.disconnect(); if (location.hash === "#merci") history.replaceState(null, "", location.pathname + location.search); }
+  $("openThanks").addEventListener("click", openThanks);
+  $("closeThanks").addEventListener("click", closeThanks);
+  addEventListener("keydown", e => { if (e.key === "Escape" && !$("thanks").hidden) { if (!$("thPanel").hidden) closePanel(); else closeThanks(); } });
+  const fromHash = () => { if (location.hash === "#merci" && $("thanks").hidden) openThanks(); };
+  addEventListener("hashchange", fromHash); fromHash();
+  window.thanksOpen = () => !$("thanks").hidden;
+})();
+
 /* ---------- Pop-up de l'album : grand format à la toute première visite, puis rangé sur le côté
    en petit onglet avec le compte à rebours (un clic le rouvre en grand) ---------- */
 (() => {
@@ -1942,7 +2109,7 @@ if (!window.THREE || (IN_APP && !try3d)) {
     if (flatMode) return;
     requestAnimationFrame(tick);
     now = now || performance.now();
-    const covered = !$("music").hidden || !$("index").hidden;
+    const covered = !$("music").hidden || !$("index").hidden || !$("thanks").hidden;
     const busy = Math.abs(progress() - fS) > .001 || now - lastInput < 1500;
     if (now - lastFrame < (covered ? 400 : busy ? 0 : 1000 / 24)) return;
     lastFrame = now;
@@ -2098,7 +2265,7 @@ if (!window.THREE || (IN_APP && !try3d)) {
   $("prevArrow").addEventListener("click", () => goTo(here() - 1));
   $("nextArrow").addEventListener("click", () => goTo(here() + 1));
   addEventListener("keydown", e => {
-    if (e.target.closest && e.target.closest("input, textarea") || !$("panel").hidden || !$("index").hidden || !$("music").hidden) return;
+    if (e.target.closest && e.target.closest("input, textarea") || !$("panel").hidden || !$("index").hidden || !$("music").hidden || !$("thanks").hidden) return;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); goTo(here() + 1); }
     if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); goTo(here() - 1); }
   });
@@ -2181,7 +2348,7 @@ function goToStop(k, instant) {
     "← Modifier le message": "← Edit the message", "Copié.": "Copied.",
     "La copie automatique est bloquée ici : sélectionnez le texte et copiez-le vous-même.": "Automatic copying is blocked here: select the text and copy it yourself.",
     "© 2026 Art Is Art · Toutes les œuvres sont des créations originales": "© 2026 Art Is Art · All works are original creations",
-    "Musique": "Music", "Album · 2026": "Album · 2026", "Écouter les extraits": "Play the previews", "Aléatoire": "Shuffle",
+    "Musique": "Music", "Merci": "Thanks", "Album · 2026": "Album · 2026", "Écouter les extraits": "Play the previews", "Aléatoire": "Shuffle",
     "Écouter l'album complet": "Listen to the full album", "Sortie dans": "Out in", "Disponible maintenant": "Available now",
     "j": "d", "jours": "days", "heures": "hours", "Bonus": "Bonus", "Bientôt": "Soon",
     "MTH · Extrait de 30 s": "MTH · 30-second preview", "Écouter en entier": "Listen in full", "Pré-sauvegarder": "Pre-save",
