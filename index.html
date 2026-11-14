@@ -208,6 +208,8 @@ body.no3d #callouts, body.no3d #stage { display: none; }
 .fready .btn { justify-self: start; text-decoration: none; display: inline-flex; }
 .fready .fhint { font-size: 13px; color: rgba(255,255,255,.6); }
 .ferr { margin: 0; min-height: 1.2em; font-size: 13px; color: #ffd2b8; }
+.hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+#fsend[disabled] { opacity: .6; }
 .linkbtn { background: none !important; border: 0; padding: 0; color: #fff; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; justify-self: start; }
 input, textarea { color: var(--white); background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.3); border-radius: 14px; color-scheme: dark;
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
@@ -1052,10 +1054,17 @@ main.insertAdjacentHTML("beforeend", `
       <form id="form" novalidate>
         <div id="formFields" class="ffields">
           <label for="nom">Nom<input id="nom" required autocomplete="name"></label>
+          <label for="vmail">Votre e-mail<input id="vmail" type="email" autocomplete="email" placeholder="pour que je puisse vous répondre"></label>
+          <input type="text" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp">
           <label for="objet">Objet<input id="objet" placeholder="Collaboration, question…"></label>
           <label for="msg">Message<textarea id="msg" required></textarea></label>
           <p class="ferr" id="ferr" role="alert"></p>
-          <button type="submit" class="btn">Préparer l'e-mail</button>
+          <button type="submit" class="btn" id="fsend">Envoyer</button>
+        </div>
+        <div id="formSent" class="fready" hidden>
+          <p class="mlabel">Message envoyé</p>
+          <p>Merci ! Votre message est bien arrivé, je vous réponds dès que possible.</p>
+          <button type="button" class="linkbtn" id="newMsg">← Écrire un autre message</button>
         </div>
         <div id="formReady" class="fready" hidden>
           <p class="mlabel">Votre message est prêt</p>
@@ -1075,11 +1084,30 @@ function copyText(txt, out, selEl) {
   const sel = () => { if (selEl) { const r = document.createRange(); r.selectNodeContents(selEl); const g = getSelection(); g.removeAllRanges(); g.addRange(r); } out.textContent = "La copie automatique est bloquée ici : sélectionnez le texte et copiez-le vous-même."; };
   try { navigator.clipboard.writeText(txt).then(ok, sel); } catch (e) { sel(); }
 }
-$("form").addEventListener("submit", e => {
+/* envoi direct (site hébergé, ex. Vercel) via FormSubmit ; sur claude.ai l'envoi externe est bloqué :
+   on prépare alors l'e-mail dans la messagerie du visiteur. Le premier envoi déclenche un e-mail
+   d'activation de FormSubmit à ozzybak.art@gmail.com (cliquer « Activate Form » une seule fois). */
+const FORM_URL = "https://formsubmit.co/ajax/" + MAIL_TO;
+const CAN_POST = /^https?:$/.test(location.protocol) && !/(^|\.)(claude\.ai|claudeusercontent\.com)$/.test(location.hostname);
+$("newMsg").addEventListener("click", () => { $("formSent").hidden = true; $("formFields").hidden = false; $("msg").value = ""; $("objet").value = ""; $("msg").focus(); });
+$("form").addEventListener("submit", async e => {
   e.preventDefault();
-  const nom = $("nom").value.trim(), objet = $("objet").value.trim(), msg = $("msg").value.trim();
+  const nom = $("nom").value.trim(), objet = $("objet").value.trim(), msg = $("msg").value.trim(), vmail = $("vmail").value.trim();
   if (!nom || !msg) { $("ferr").textContent = !nom ? "Indiquez votre nom." : "Écrivez votre message."; (!nom ? $("nom") : $("msg")).focus(); return; }
+  if (vmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(vmail)) { $("ferr").textContent = "Cette adresse e-mail ne semble pas valide."; $("vmail").focus(); return; }
+  if ($("hp").value) return;   // piège à robots
   $("ferr").textContent = "";
+  if (CAN_POST && vmail) {
+    const btn = $("fsend"); btn.disabled = true; btn.textContent = "Envoi…";
+    try {
+      const r = await fetch(FORM_URL, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ name: nom, email: vmail, _replyto: vmail, _subject: `Art Is Art · ${objet || "Message"} · ${nom}`, objet: objet || "—", message: msg, _template: "table", _captcha: "false" }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && String(j.success) !== "false") { $("formFields").hidden = true; $("formSent").hidden = false; btn.disabled = false; btn.textContent = "Envoyer"; return; }
+    } catch (err) {}
+    btn.disabled = false; btn.textContent = "Envoyer";
+    $("ferr").textContent = "L'envoi direct n'a pas marché : vous pouvez l'envoyer depuis votre messagerie.";
+  } else if (CAN_POST && !vmail) { $("ferr").textContent = "Indiquez votre e-mail pour que je puisse vous répondre."; $("vmail").focus(); return; }
   const subject = `Art Is Art · ${objet || "Message"} · ${nom}`;
   mailText = `${msg}\n\n${nom}`;
   $("mailGo").href = `mailto:${MAIL_TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mailText)}`;
