@@ -2231,10 +2231,31 @@ if (!window.THREE || (IN_APP && !try3d)) {
       else { bx = clamp(px - sw / 2, 10, W - sw - 10); by = py - 34 - sh; }
       vis.push({ el, span, s: el.children[1], px, py, sw, sh, bx, by, mode });
     });
+    // téléphone : l'œuvre occupe le centre de l'écran, il n'y a pas de place sur les côtés.
+    // Les étiquettes vont dans la bande au-dessus de l'œuvre (détails du haut) et dans celle au-dessous
+    // (détails du bas et taille), jamais par-dessus l'image ; le trait relie le détail au bord de l'étiquette.
+    if (phone && vis.length) {
+      const cs = [[-.5, -.5], [.5, -.5], [-.5, .5], [.5, .5]].map(([a, b]) => { v.set(a * it.fw, b * it.fh, .1).applyMatrix4(it.g.matrixWorld).project(camera); return [(v.x * .5 + .5) * W, (-v.y * .5 + .5) * H]; });
+      const aTop = Math.min(...cs.map(c => c[1])), aBot = Math.max(...cs.map(c => c[1]));
+      const card = workCards[ci], cTop = card ? card.getBoundingClientRect().top : H * .66;
+      const hdr = 104, ups = [], downs = [];
+      vis.filter(o => !o.el.classList.contains("size")).sort((a, b) => a.py - b.py).forEach((o, k) => {
+        (k === 0 && aTop - hdr > o.sh + 18) || (o.py < (aTop + aBot) / 2 && aTop - hdr > 2 * o.sh + 26) ? ups.push(o) : downs.push(o); });
+      vis.filter(o => o.el.classList.contains("size")).forEach(o => downs.push(o));
+      ups.sort((a, b) => b.py - a.py).forEach((o, k) => { o.mode = "up"; o.bx = clamp(o.px - o.sw / 2, 12, W - o.sw - 12); o.by = Math.max(hdr, aTop - 20 - o.sh - k * (o.sh + 6)); });
+      downs.sort((a, b) => a.py - b.py).forEach((o, k) => { o.mode = "down"; o.bx = clamp(o.px - o.sw / 2, 12, W - o.sw - 12); o.by = Math.min(cTop - 8 - o.sh, aBot + 20 + k * (o.sh + 6)); });
+      // deux étiquettes d'une même bande qui se touchent : on les écarte sur les côtés
+      [ups, downs].forEach(band => { for (let i = 0; i < band.length; i++) for (let j = i + 1; j < band.length; j++) {
+        const A = band[i], B = band[j];
+        if (Math.abs(A.by - B.by) < A.sh + 4 && A.bx < B.bx + B.sw + 8 && B.bx < A.bx + A.sw + 8) {
+          const L = A.px <= B.px ? A : B, R = L === A ? B : A;
+          L.bx = clamp(Math.min(L.bx, W / 2 - L.sw - 4), 12, W); R.bx = clamp(Math.max(R.bx, W / 2 + 4), 0, W - R.sw - 12);
+        } } });
+    }
     // anti-chevauchement : les étiquettes qui se touchent sont écartées verticalement
     const top0 = 76, bot0 = H - 70;
     vis.sort((a, b) => a.by - b.by);
-    for (let pass = 0; pass < 4; pass++) {
+    for (let pass = 0; pass < (phone ? 0 : 4); pass++) {
       for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) {
         const A = vis[i], B = vis[j];
         const hx = A.bx < B.bx + B.sw + GAP && B.bx < A.bx + A.sw + GAP;
@@ -2249,7 +2270,7 @@ if (!window.THREE || (IN_APP && !try3d)) {
       o.span.style.top = (o.by - o.py).toFixed(1) + "px";
       // le trait relie le point au bord de l'étiquette, même si elle a été décalée
       const ax = o.mode === "right" ? o.bx : o.mode === "left" ? o.bx + o.sw : clamp(o.px, o.bx + 14, o.bx + o.sw - 14);
-      const ay = o.mode === "up" ? o.by + o.sh : clamp(o.py, o.by + 8, o.by + o.sh - 8);
+      const ay = o.mode === "up" ? o.by + o.sh : o.mode === "down" ? o.by : clamp(o.py, o.by + 8, o.by + o.sh - 8);
       const dx = ax - o.px, dy = ay - o.py, len = Math.max(0, Math.hypot(dx, dy) - 2);
       o.s.style.width = len.toFixed(1) + "px";
       o.s.style.transform = `rotate(${Math.atan2(dy, dx).toFixed(4)}rad)`;
@@ -2419,6 +2440,5 @@ function goToStop(k, instant) {
   sync();
 })();
 </script>
-
 </body>
 </html>
