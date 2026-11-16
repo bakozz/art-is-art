@@ -68,6 +68,7 @@ main button, .contact-card { pointer-events: auto; }
 .sec { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding-block: 100px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
 .work { min-height: 150vh; align-items: flex-start; }
 .wcard { position: sticky; top: 22vh; }
+.esz { display: none; } @media (max-width: 759px) { .esz { display: inline; } }
 .copy { max-width: 380px; display: grid; gap: 14px; }
 .eyebrow { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; color: var(--dim); font-variant-numeric: tabular-nums; }
 .copy h2 { font-family: var(--f-display); font-weight: 400; text-transform: uppercase; font-size: clamp(48px, 6.5vw, 96px); line-height: .9; margin: 0; letter-spacing: .005em; text-wrap: balance; }
@@ -345,7 +346,7 @@ footer { padding-bottom: calc(28px + var(--rim) + env(safe-area-inset-bottom, 0p
 
 /* ---------- Index de toutes les œuvres ---------- */
 .hright .pill.keep { display: inline-block !important; }
-@media (max-width: 420px) { .hright .pill.keep { padding: 8px 12px; font-size: 11px; } }
+@media (max-width: 540px) { .hright .pill.keep { padding: 8px 12px; font-size: 11px; } }
 .index { position: fixed; inset: 0; z-index: 12; overflow-y: auto; background: rgba(12,14,10,.62); -webkit-backdrop-filter: blur(22px) saturate(140%); backdrop-filter: blur(22px) saturate(140%);
   padding-block: calc(24px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-bottom, 0px));
   padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
@@ -651,7 +652,8 @@ body.mp-dock footer { padding-bottom: 90px; }
 /* fiche du message (même style que la fiche d'une œuvre) */
 .th-panel { z-index: 17; }
 .th-pded { margin: -8px 0 18px; font-style: italic; font-size: 17px; color: rgba(255,255,255,.88); }
-@media (max-width: 420px) { .hright { gap: 6px; } .hright .pill.keep, .hright .pill.solid { padding: 8px 10px; font-size: 10px; letter-spacing: .06em; } }
+@media (max-width: 540px) { .hright { gap: 6px; } .hright .pill.keep, .hright .pill.solid { padding: 8px 10px; font-size: 10px; letter-spacing: .06em; } }
+@media (max-width: 374px) { .hright { gap: 4px; } .hright .pill.keep, .hright .pill.solid { padding: 7px 8px; font-size: 9.5px; letter-spacing: .03em; } .logo img { height: 38px; } }
 @keyframes promoIn { from { opacity: 0; } }
 @keyframes promoUp { from { opacity: 0; transform: translateY(24px) scale(.97); } }
 @media (max-width: 620px) { .promo-card { grid-template-columns: 1fr; gap: 16px; padding: 18px; text-align: center; } .promo-cover { width: min(56vw, 220px); justify-self: center; } .promo-cd, .promo-acts { justify-content: center; } }
@@ -1212,7 +1214,7 @@ const main = $("sections");
 works.forEach((w, i) => {
   const s = document.createElement("section"); s.className = "sec work";
   s.innerHTML = `<div class="copy wcard">
-    <span class="eyebrow">${pad(i + 1)} / ${pad(N)} · ${w.cat} · ${w.year}</span>
+    <span class="eyebrow">${pad(i + 1)} / ${pad(N)} · ${w.cat} · ${w.year}<span class="esz"></span></span>
     <h2>${w.t.split(" ").map((x, k) => `<span class="wd"><span style="--d:${k}">${x}</span></span>`).join(" ")}</h2>
     <p>${((t => (t.match(/^.*?[.!?…](\s|$)/) || [t])[0].trim())(w.d.split(/\n+/).filter(l => !/^(#|>)/.test(l.trim()))[0] || w.d))}</p>
     <button type="button" class="btn" data-work="${i}">Découvrir l'œuvre</button>
@@ -2239,11 +2241,17 @@ if (!window.THREE || (IN_APP && !try3d)) {
       const aTop = Math.min(...cs.map(c => c[1])), aBot = Math.max(...cs.map(c => c[1]));
       const card = workCards[ci], cTop = card ? card.getBoundingClientRect().top : H * .66;
       const hdr = 104, ups = [], downs = [];
-      vis.filter(o => !o.el.classList.contains("size")).sort((a, b) => a.py - b.py).forEach((o, k) => {
-        (k === 0 && aTop - hdr > o.sh + 18) || (o.py < (aTop + aBot) / 2 && aTop - hdr > 2 * o.sh + 26) ? ups.push(o) : downs.push(o); });
-      vis.filter(o => o.el.classList.contains("size")).forEach(o => downs.push(o));
-      ups.sort((a, b) => b.py - a.py).forEach((o, k) => { o.mode = "up"; o.bx = clamp(o.px - o.sw / 2, 12, W - o.sw - 12); o.by = Math.max(hdr, aTop - 20 - o.sh - k * (o.sh + 6)); });
-      downs.sort((a, b) => a.py - b.py).forEach((o, k) => { o.mode = "down"; o.bx = clamp(o.px - o.sw / 2, 12, W - o.sw - 12); o.by = Math.min(cTop - 8 - o.sh, aBot + 20 + k * (o.sh + 6)); });
+      // sous l'œuvre il y a la pierre : tout passe au-dessus. La taille n'a pas de branche, elle s'affiche dans la carte.
+      vis.filter(o => o.el.classList.contains("size")).forEach(o => { o.el.style.opacity = 0; o.hide = true; });
+      if (card) { const e = card.querySelector(".esz"), t = sizeOf(wk); const txt = t && t !== "—" ? " · " + t : ""; if (e && e.textContent !== txt) e.textContent = txt; }
+      vis.filter(o => !o.hide).sort((a, b) => a.py - b.py).forEach(o => ups.push(o));
+      // petit écran : on garde seulement les branches qui tiennent entre le menu et l'œuvre
+      const rowH = (ups[0] ? ups[0].sh : 26) + 8, rows = Math.max(1, Math.floor((aTop - 12 - hdr + 8) / rowH));
+      ups.splice(rows).forEach(o => { o.el.style.opacity = 0; o.hide = true; });
+      // la branche du point le plus haut prend la ligne la plus proche de l'œuvre
+      ups.sort((a, b) => a.py - b.py).forEach((o, k) => { o.mode = "up"; o.bx = clamp(o.px - o.sw / 2, 12, W - o.sw - 12); o.by = aTop - (rows > 1 ? 18 : 12) - o.sh - k * (o.sh + 8); });
+      const over = hdr - Math.min(...ups.map(o => o.by), Infinity);
+      if (over > 0) ups.forEach(o => { o.by += over; });
       // deux étiquettes d'une même bande qui se touchent : on les écarte sur les côtés
       [ups, downs].forEach(band => { for (let i = 0; i < band.length; i++) for (let j = i + 1; j < band.length; j++) {
         const A = band[i], B = band[j];
@@ -2266,6 +2274,7 @@ if (!window.THREE || (IN_APP && !try3d)) {
       vis.sort((a, b) => a.by - b.by);
     }
     vis.forEach(o => {
+      if (o.hide) return;
       o.span.style.left = (o.bx - o.px).toFixed(1) + "px";
       o.span.style.top = (o.by - o.py).toFixed(1) + "px";
       // le trait relie le point au bord de l'étiquette, même si elle a été décalée
